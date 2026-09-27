@@ -47,8 +47,13 @@ def main():
     merged = pd.merge(master_df, sub_hydro, on=["Ticker", "Year_Int"], how="left")
     
     if merged["Market_Cap"].isna().any():
-        med_ps = (merged["Market_Cap"] / (merged["Revenue"].replace(0, np.nan))).median()
-        merged["Market_Cap"] = merged["Market_Cap"].fillna(merged["Revenue"] * med_ps)
+        merged["PS_Ratio"] = merged["Market_Cap"] / merged["Revenue"].replace(0, np.nan)
+        yearly_med_ps = merged.groupby("Year_Int")["PS_Ratio"].median().sort_index()
+        expanding_med_ps = yearly_med_ps.expanding().median()
+        merged["Expanding_Med_PS"] = merged["Year_Int"].map(expanding_med_ps)
+        merged["Expanding_Med_PS"] = merged["Expanding_Med_PS"].ffill().bfill()
+        merged["Market_Cap"] = merged["Market_Cap"].fillna(merged["Revenue"] * merged["Expanding_Med_PS"])
+        merged = merged.drop(columns=["PS_Ratio", "Expanding_Med_PS"])
         
     if merged["Total_Debt"].isna().any():
         merged["Total_Debt"] = merged["Total_Debt"].fillna(0)

@@ -8,3 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Ignored specific directories and files
+papers_manuscript/
+nea_annual_reports/
+nrb_reports/
+.agents/
+.ipynb_checkpoints/
+
+# Other ignored files
+research_objective.md
+progress_track/
